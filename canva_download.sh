@@ -1,13 +1,29 @@
-wget -E -k -p https://rvaindivisible.my.canva.site/
-#wget https://rvaindivisible.my.canva.site/_assets/media/979aae7099f79a779d536deee0dc8e23.jpg
-#wget https://rvaindivisible.my.canva.site/_assets/media/4dd7e490a8338830819a6636d93ef05f.svg
-#wget https://rvaindivisible.my.canva.site/_assets/media/bc225aa729502c9924a7e47bf838f78d.jpg
-#wget https://rvaindivisible.my.canva.site/_assets/media/2c39797aee7dcb9aaeb39bca2f9e1668.jpg
-#wget https://rvaindivisible.my.canva.site/_assets/media/e61c27aff32220fba65cfbbec4a1a818.jpg
-#wget https://rvaindivisible.my.canva.site/_assets/media/2c39797aee7dcb9aaeb39bca2f9e1668.jpg
-#wget https://rvaindivisible.my.canva.site/_assets/media/5b214baf5a97f9d7569fbd08de03dd31.jpg
-#wget https://rvaindivisible.my.canva.site/_assets/fonts/28079cb92e949f9dc7acfe61dfe2a0a9.woff2
-#wget https://rvaindivisible.my.canva.site/_assets/fonts/d6eb5721f46301170397393323ce8a86.woff2
-#wget https://rvaindivisible.my.canva.site/_assets/fonts/e3741b24826d89cccb250297aac9c43b.woff2
-#wget https://rvaindivisible.my.canva.site/_assets/fonts/ee82d41f23c8c5465af1fc940da4a36c.woff2
-#wget https://rvaindivisible.my.canva.site/_assets/fonts/fa0977e05da69370ebb53ec25bbfdd11.woff2
+# Would be nice if this worked:
+# chromium --headless --window-size=1920,1080 --run-all-compositor-stages-before-draw --virtual-time-budget=9000 --incognito --dump-dom https://rvaindivisible.my.canva.site/ | monolith - -I -b https://rvaindivisible.my.canva.site/ -o index.html
+
+#wget -E -k -p https://rvaindivisible.my.canva.site/
+wget -mpck --html-extension -e robots=off https://rvaindivisible.my.canva.site/
+
+mkdir rvaindivisible.my.canva.site/_assets/media/
+mkdir rvaindivisible.my.canva.site/_assets/fonts/
+
+for media_asset in $(grep -o '_assets\/media\/\w\+\.\w\+' rvaindivisible.my.canva.site/index.html 2>/dev/null | sort -u); do
+    wget rvaindivisible.my.canva.site/${media_asset} -O rvaindivisible.my.canva.site/${media_asset}
+done
+
+for font_asset in $(grep -o '_assets\/fonts\/\w\+\.\w\+' rvaindivisible.my.canva.site/index.html 2>/dev/null | sort -u); do
+    wget rvaindivisible.my.canva.site/${font_asset} -O rvaindivisible.my.canva.site/${font_asset}
+done
+
+# GitHub pages didn't seem to like _assets
+sed -i -e 's/_assets/assets/g' rvaindivisible.my.canva.site/index.html
+mv rvaindivisible.my.canva.site/_assets rvaindivisible.my.canva.site/assets
+
+# Clean up existing content in root
+rm -fr index.html assets/
+
+# Move new content to root
+mv rvaindivisible.my.canva.site/* .
+
+# Remove leftover staging directory
+rm -fr rvaindivisible.my.canva.site/
